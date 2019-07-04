@@ -11,11 +11,12 @@ def parse(self, exclusive = False):
     meta = self.meta
     ext = '.parsed'
     ann = self.FLAGS.annotation
+    processes = self.FLAGS.parserProcesses
     if not os.path.isdir(ann):
         msg = 'Annotation directory not found {} .'
         exit('Error: {}'.format(msg.format(ann)))
     print('\n{} parsing {}'.format(meta['model'], ann))
-    dumps = pascal_voc_clean_xml(ann, meta['labels'], exclusive)
+    dumps = pascal_voc_clean_xml(processes, ann, meta['labels'], exclusive)
     return dumps
 
 
