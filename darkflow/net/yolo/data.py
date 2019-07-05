@@ -1,4 +1,4 @@
-from ...utils.pascal_voc_clean_xml import pascal_voc_clean_xml
+from ...utils.pascal_voc_clean_xml import pascal_voc_clean_xml, get_annotations, process_annotation_for_file
 from numpy.random import permutation as perm
 from .predict import preprocess
 # from .misc import show
@@ -95,8 +95,8 @@ def _batch(self, chunk):
 
 def shuffle(self):
     batch = self.FLAGS.batch
-    data = self.parse()
-    size = len(data)
+    annotations = get_annotations(self.FLAGS.annotation)
+    size = len(annotations)
 
     print('Dataset of {} instance(s)'.format(size))
     if batch > size: self.FLAGS.batch = batch = size
@@ -110,7 +110,8 @@ def shuffle(self):
             feed_batch = dict()
 
             for j in range(b*batch, b*batch+batch):
-                train_instance = data[shuffle_idx[j]]
+                annot_file = annotations[shuffle_idx[j]]
+                file, train_instance = process_annotation_for_file((annot_file, self.meta['labels']))
                 try:
                     inp, new_feed = self._batch(train_instance)
                 except ZeroDivisionError:

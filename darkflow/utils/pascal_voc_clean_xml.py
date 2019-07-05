@@ -7,8 +7,8 @@ import sys
 import xml.etree.ElementTree as ET
 import glob
 from multiprocessing.pool import Pool
-from multiprocessing.queues import Queue
 
+pool = None
 
 def _pp(l): # pretty printing 
     for i in l: print('{}: {}'.format(i,l[i]))
@@ -41,8 +41,15 @@ def process_annotation_for_file(args):
         current = [name,xn,yn,xx,yx]
         all += [current]
 
-    add = [[jpg, [w, h, all]]]
+    add = [jpg, [w, h, all]]
     return file, add
+
+def get_annotations(ANN):
+    cur_dir = os.getcwd()
+    os.chdir(ANN)
+    annotations = os.listdir('.')
+    annotations = glob.glob(str(annotations)+'*.xml')
+    return annotations
 
 def pascal_voc_clean_xml(processes, ANN, pick, exclusive = False):
     print('Parsing for {} {}'.format(
@@ -55,20 +62,21 @@ def pascal_voc_clean_xml(processes, ANN, pick, exclusive = False):
     annotations = glob.glob(str(annotations)+'*.xml')
     args = [(file, pick) for file in annotations]
     size = len(annotations)
-    with Pool(processes=processes) as pool:
-        for i, responses in enumerate(pool.imap(process_annotation_for_file, args)):
-            file = responses[0]
-            add = responses[1]
+    if pool is None:
+        pool = Pool(processes=processes)
+    for i, responses in enumerate(pool.imap(process_annotation_for_file, args)):
+        file = responses[0]
+        add = responses[1]
 
-            # progress bar      
-            sys.stdout.write('\r')
-            percentage = 1. * (i+1) / size
-            progress = int(percentage * 20)
-            bar_arg = [progress*'=', ' '*(19-progress), percentage*100]
-            bar_arg += [file]
-            sys.stdout.write('[{}>{}]{:.0f}%  {}'.format(*bar_arg))
-            sys.stdout.flush()
-            dumps += add
+        # progress bar      
+        sys.stdout.write('\r')
+        percentage = 1. * (i+1) / size
+        progress = int(percentage * 20)
+        bar_arg = [progress*'=', ' '*(19-progress), percentage*100]
+        bar_arg += [file]
+        sys.stdout.write('[{}>{}]{:.0f}%  {}'.format(*bar_arg))
+        sys.stdout.flush()
+        dumps += add
 
     # gather all stats
     stat = dict()
