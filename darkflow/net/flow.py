@@ -20,6 +20,7 @@ def _save_ckpt(self, step, loss_profile):
 
     profile = file.format(model, step, '.profile')
     profile = os.path.join(self.FLAGS.backup, profile)
+    profile = os.path.abspath(profile)
     with open(profile, 'wb') as profile_ckpt: 
         pickle.dump(loss_profile, profile_ckpt)
 

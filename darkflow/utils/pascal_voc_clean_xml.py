@@ -45,10 +45,8 @@ def process_annotation_for_file(args):
     return file, add
 
 def get_annotations(ANN):
-    cur_dir = os.getcwd()
-    os.chdir(ANN)
-    annotations = os.listdir('.')
-    annotations = glob.glob(str(annotations)+'*.xml')
+    annotations = os.listdir(ANN)
+    annotations = glob.glob(ANN + '/*.xml')
     return annotations
 
 def pascal_voc_clean_xml(processes, ANN, pick, exclusive = False):
